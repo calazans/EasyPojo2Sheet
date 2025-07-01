@@ -1,2 +1,2 @@
-# poi-excel2java
+# EasyPojSheet
 This is java wrapper to apache-poi to read and write excel files
