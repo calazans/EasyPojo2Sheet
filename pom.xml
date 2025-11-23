@@ -54,12 +54,6 @@
 			<version>5.4.0</version>
 		</dependency>
 
-		<!-- ODF4J (OpenOffice) -->
-		<dependency>
-			<groupId>org.odftoolkit</groupId>
-			<artifactId>odfdom-java</artifactId>
-			<version>0.12.0</version>
-		</dependency>
 
 		<!-- Bean Validation -->
 		<dependency>
@@ -79,7 +73,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>teste-${project.version}</finalName>
+		<finalName>${project.name}-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
