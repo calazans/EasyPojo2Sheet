@@ -17,4 +17,5 @@ module easypojsheet.core {
     exports br.com.easypojsheet.core.writer;
     exports br.com.easypojsheet.exception;
     exports br.com.easypojsheet.model.enums;
+    exports br.com.easypojsheet.core.writer.excel;
 }

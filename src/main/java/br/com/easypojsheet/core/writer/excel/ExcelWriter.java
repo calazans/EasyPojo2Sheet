@@ -1,7 +1,8 @@
-package br.com.easypojsheet.core.writer;
+package br.com.easypojsheet.core.writer.excel;
 
 import br.com.easypojsheet.core.metadata.ColumnMetadata;
 import br.com.easypojsheet.core.metadata.SheetMetadata;
+import br.com.easypojsheet.core.writer.Writer;
 import br.com.easypojsheet.exception.ExcelExportException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -10,22 +11,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+
 
 /**
  * Responsável por escrever dados em um arquivo Excel usando Apache POI.
  */
-public class ExcelWriter {
+public class ExcelWriter implements Writer {
 
     private final Workbook workbook;
     private final SheetMetadata metadata;
+    private final CellStyleFactory styleFactory;
 
     public ExcelWriter(SheetMetadata metadata) {
         this.metadata = metadata;
         this.workbook = new XSSFWorkbook();
+        this.styleFactory = new CellStyleFactory(workbook);
     }
 
     /**
@@ -60,28 +61,16 @@ public class ExcelWriter {
      */
     private void createHeader(Sheet sheet) {
         Row headerRow = sheet.createRow(metadata.getStartRow());
-        CellStyle headerStyle = createHeaderStyle();
+        CellStyle headerStyle = styleFactory.createHeaderStyle();
 
-        List<ColumnMetadata> columns = metadata.getColumns();
-        for (int i = 0; i < columns.size(); i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(columns.get(i).getColumnName());
+        int colIndex = 0;
+        for (ColumnMetadata column : metadata.getColumns()) {
+            Cell cell = headerRow.createCell(colIndex++);
+            cell.setCellValue(column.getColumnName());
             cell.setCellStyle(headerStyle);
         }
     }
 
-    /**
-     * Cria estilo padrão para o header.
-     */
-    private CellStyle createHeaderStyle() {
-        CellStyle style = workbook.createCellStyle();
-        Font font = workbook.createFont();
-        font.setBold(true);
-        style.setFont(font);
-        style.setAlignment(org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER);
-        style.setVerticalAlignment(org.apache.poi.ss.usermodel.VerticalAlignment.CENTER);
-        return style;
-    }
 
     /**
      * Escreve os dados nas linhas.
@@ -113,13 +102,19 @@ public class ExcelWriter {
      * Extrai o valor do campo (com suporte a objetos aninhados).
      */
     private Object extractValue(Object item, ColumnMetadata column) throws Exception {
+        if (item == null) {
+            return null;
+        }
+
         if (column.hasPropertyPath()) {
             return extractNestedValue(item, column.getPropertyPath());
-        } else {
-            Field field = column.getField();
-            field.setAccessible(true);
-            return field.get(item);
         }
+
+        Field field = column.getField();
+        field.setAccessible(true);
+        return field.get(item);
+
+
     }
 
     /**
@@ -151,22 +146,8 @@ public class ExcelWriter {
             return;
         }
 
-        // Tratamento por tipo
-        if (value instanceof String stringValue) {
-            cell.setCellValue(stringValue);
-        } else if (value instanceof Number numberValue) {
-            cell.setCellValue(numberValue.doubleValue());
-        } else if (value instanceof Boolean booleanValue) {
-            cell.setCellValue(booleanValue);
-        } else if (value instanceof LocalDate dateValue) {
-            String pattern = getDatePattern(column, "dd/MM/yyyy");
-            cell.setCellValue(dateValue.format(DateTimeFormatter.ofPattern(pattern)));
-        } else if (value instanceof LocalDateTime dateTimeValue) {
-            String pattern = getDatePattern(column, "dd/MM/yyyy HH:mm:ss");
-            cell.setCellValue(dateTimeValue.format(DateTimeFormatter.ofPattern(pattern)));
-        } else {
-            cell.setCellValue(value.toString());
-        }
+        ExcelCellValueType.fromClass(value.getClass()).setCellValue(cell, value,styleFactory, column);
+
     }
 
     private String getDatePattern(ColumnMetadata column, String defaultPattern) {

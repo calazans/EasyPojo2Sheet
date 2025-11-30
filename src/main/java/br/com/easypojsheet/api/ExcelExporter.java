@@ -2,7 +2,9 @@ package br.com.easypojsheet.api;
 
 import br.com.easypojsheet.core.metadata.SheetMetadata;
 import br.com.easypojsheet.core.processor.MetadataExtractor;
-import br.com.easypojsheet.core.writer.ExcelWriter;
+import br.com.easypojsheet.core.writer.Writer;
+import br.com.easypojsheet.core.writer.excel.ExcelStreamingWriter;
+import br.com.easypojsheet.core.writer.excel.ExcelWriter;
 import br.com.easypojsheet.exception.ExcelExportException;
 
 import java.io.IOException;
@@ -48,7 +50,8 @@ public class ExcelExporter<T> {
             // TODO: Aplicar locale para formatação
 
             // Cria writer e escreve
-            ExcelWriter writer = new ExcelWriter(metadata);
+            Writer writer = (config.isStreamingMode()? new ExcelStreamingWriter(metadata, config.getRowAccessWindowSize())
+                    :new ExcelWriter(metadata));
             writer.write(data);
 
             // Salva em arquivo ou stream
