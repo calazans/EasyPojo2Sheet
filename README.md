@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/calazans/EasyPojo2Sheet/main/.github/assets/logo.png" alt="EasyPojo2Sheet" width="320"/>
+  <img src=".github/assets/logo.png" alt="EasyPojo2Sheet" width="320"/>
   <br><br>
   <p><strong>Zero-dependency, ultra-fast and type-safe Java library to export POJOs to Excel</strong></p>
 
