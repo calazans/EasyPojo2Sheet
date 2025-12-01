@@ -5,24 +5,55 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#jobs-overview & https://circleci.com/docs/reference/configuration-reference/#jobs
 jobs:
-  build:
+  build_and_test:
     docker:
-      - image: cimg/openjdk:17.0 # Use a suitable OpenJDK version
+      - image: cimg/openjdk:17.0 # Use an appropriate OpenJDK image
     steps:
-      - checkout
+      - checkout # Checkout your code from VCS
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            - v1-dependencies-
-      - run: mvn dependency:go-offline
+            - v1-dependencies-{{ checksum "pom.xml" }} # Cache Maven dependencies
+            - v1-dependencies- # Fallback cache
+      - run: mvn dependency:resolve # Resolve Maven dependencies
       - save_cache:
           paths:
-            - ~/.m2 # For Maven cache
+            - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
-      - run: mvn clean install
+      - run: mvn test # Run your unit tests
+      - store_test_results:
+          path: target/surefire-reports # Store test reports
+      - run: mvn jacoco:prepare-agent install jacoco:report # Generate JaCoCo code coverage
+      - store_artifacts:
+          path: target/site/jacoco # Store JaCoCo reports as artifacts
+    create_github_tag:
+      docker:
+        - image: cimg/base:2023.09 # A base image
+      steps:
+        - checkout
+        - run:
+            name: Create GitHub Tag
+            command: |
+              if [ -n "$CIRCLE_TAG" ]; then
+                echo "Skipping tag creation as this is already a tagged build."
+              else
+                NEW_TAG="v1.0.${CIRCLE_BUILD_NUM}" # Example tag format
+                git config user.email "circleci@example.com"
+                git config user.name "CircleCI"
+                git tag $NEW_TAG
+                git push https://${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git $NEW_TAG
+                echo "Created GitHub tag: $NEW_TAG"
+              fi
 
 # See: https://circleci.com/docs/guides/orchestrate/workflows/ & https://circleci.com/docs/reference/configuration-reference/#workflows
 workflows:
-  build_and_test:
+  build_test_and_tag:
     jobs:
-      - build
+      - build_and_test
+      - create_github_tag:
+          requires:
+            - build_and_test # Ensure tagging only happens after successful build and test
+          filters:
+            branches:
+              only: main # Only create tags on the main branch
+            tags:
+              ignore: /.*/ # Do not run this job on existing tags
