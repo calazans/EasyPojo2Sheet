@@ -10,12 +10,12 @@ module easypojsheet.core {
     requires transitive java.desktop;
 
     // Export public API packages of this library
-    exports br.com.easypojsheet.annotation;
-    exports br.com.easypojsheet.api;
-    exports br.com.easypojsheet.core.metadata;
-    exports br.com.easypojsheet.core.processor;
-    exports br.com.easypojsheet.core.writer;
-    exports br.com.easypojsheet.exception;
-    exports br.com.easypojsheet.model.enums;
-    exports br.com.easypojsheet.core.writer.excel;
+    exports br.com.easypojo2sheet.annotation;
+    exports br.com.easypojo2sheet.api;
+    exports br.com.easypojo2sheet.core.metadata;
+    exports br.com.easypojo2sheet.core.processor;
+    exports br.com.easypojo2sheet.core.writer;
+    exports br.com.easypojo2sheet.exception;
+    exports br.com.easypojo2sheet.model.enums;
+    exports br.com.easypojo2sheet.core.writer.excel;
 }
