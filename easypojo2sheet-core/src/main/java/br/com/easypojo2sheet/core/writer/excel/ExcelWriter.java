@@ -150,10 +150,6 @@ public class ExcelWriter implements Writer {
 
     }
 
-    private String getDatePattern(ColumnMetadata column, String defaultPattern) {
-        return column.getDateFormat().isEmpty() ? defaultPattern : column.getDateFormat();
-    }
-
     /**
      * Ajusta largura das colunas automaticamente.
      */

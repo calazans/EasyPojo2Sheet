@@ -29,13 +29,13 @@ public @interface Spreadsheet {
      * Ajusta automaticamente a largura das colunas baseado no conteúdo.
      * @return true para auto-size, false caso contrário
      */
-    boolean autoSizeColumns() default true;
+    boolean autoSizeColumns() default false;
     
     /**
      * Congela a linha de cabeçalho para rolagem.
      * @return true para congelar header, false caso contrário
      */
-    boolean freezeHeader() default true;
+    boolean freezeHeader() default false;
     
     /**
      * Linha inicial onde os dados começam (0-based).

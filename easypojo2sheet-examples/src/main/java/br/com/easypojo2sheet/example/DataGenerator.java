@@ -11,20 +11,20 @@ import java.util.Locale;
 
 public class DataGenerator {
 
-    private static  Faker faker = new Faker(new Locale("pt-BR"));
+    private static final Faker FAKER = new Faker(new Locale("pt-BR"));
 
     public RelatorioVenda gerarRelatorioVenda() {
-        Long id = faker.number().numberBetween(1L, 1_000_000L);
-        LocalDate data = LocalDate.now().minusDays(faker.number().numberBetween(0, 30));
-        String cliente = faker.name().fullName();
+        Long id = FAKER.number().numberBetween(1L, 1_000_000L);
+        LocalDate data = LocalDate.now().minusDays(FAKER.number().numberBetween(0, 30));
+        String cliente = FAKER.name().fullName();
         Funcionario vendedor = new Funcionario(
-                faker.name().fullName(),
-                faker.cpf().valid()
+                FAKER.name().fullName(),
+                FAKER.cpf().valid()
         );
-        BigDecimal valor = BigDecimal.valueOf(faker.number().randomDouble(2, 100, 5000))
+        BigDecimal valor = BigDecimal.valueOf(FAKER.number().randomDouble(2, 100, 5000))
                 .setScale(2, RoundingMode.HALF_UP);
         BigDecimal comissao = valor.multiply(BigDecimal.valueOf(0.10)).setScale(2, RoundingMode.HALF_UP);
-        String obs = faker.lorem().sentence();
+        String obs = FAKER.lorem().sentence();
 
         return new RelatorioVenda(
                 id,

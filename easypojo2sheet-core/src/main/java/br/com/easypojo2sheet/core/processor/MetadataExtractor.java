@@ -59,7 +59,7 @@ public class MetadataExtractor {
             var propertyPath = "";
             var dateFormat = "";
             var numberFormat = "";
-            var horizontalAlignment=HorizontalAlignment.AUTO;;
+            var horizontalAlignment=HorizontalAlignment.AUTO;
             var verticalAlignment = br.com.easypojo2sheet.model.enums.VerticalAlignment.CENTER;
 
             if (columnAnnotation != null) {

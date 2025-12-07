@@ -8,7 +8,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
 
 
 import java.io.ByteArrayOutputStream;
@@ -50,7 +49,7 @@ public class MemoriaBenchmark {
 
 
     @Benchmark
-    public byte[] easyPojo2Sheet() throws Exception {
+    public byte[] easyPojo2Sheet() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ExcelExporter.<SampleData>builder()
                 .data(data)
@@ -97,7 +96,7 @@ public class MemoriaBenchmark {
     }
 
     @Benchmark
-    public byte[] easyExcel() throws Exception {
+    public byte[] easyExcel()  {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         EasyExcel.write(out, AlibabaExcelData.class)
                 .sheet("Sheet1")

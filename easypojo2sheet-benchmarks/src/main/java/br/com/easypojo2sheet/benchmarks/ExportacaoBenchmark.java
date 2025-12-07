@@ -55,7 +55,7 @@ public class ExportacaoBenchmark {
     }
 
     @Benchmark
-    public void easyPojo2Sheet(DataState state, Blackhole bh) throws Exception {
+    public void easyPojo2Sheet(DataState state, Blackhole bh)  {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         ExcelExporter.<SampleData>builder()
@@ -105,7 +105,7 @@ public class ExportacaoBenchmark {
     }
 
     @Benchmark
-    public void easyExcel(DataState state, Blackhole bh) throws Exception {
+    public void easyExcel(DataState state, Blackhole bh) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         EasyExcel.write(out, AlibabaExcelData.class)

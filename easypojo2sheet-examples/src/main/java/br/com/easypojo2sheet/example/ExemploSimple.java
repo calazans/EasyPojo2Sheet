@@ -2,8 +2,6 @@ package br.com.easypojo2sheet.example;
 
 import br.com.easypojo2sheet.api.ExcelExporter;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 /**
