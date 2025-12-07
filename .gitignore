@@ -24,3 +24,13 @@ hs_err_pid*
 /.idea/
 *.xlsx
 /target/
+/easypojo2sheet-benchmarks/resultado/charts/memory.png
+/easypojo2sheet-benchmarks/resultado/charts/comparison.png
+/easypojo2sheet-benchmarks/resultado/charts/throughput.png
+/easypojo2sheet-benchmarks/resultado/comparison_benchmark.json
+/easypojo2sheet-benchmarks/resultado/export_benchmark.json
+/easypojo2sheet-benchmarks/resultado/memory_benchmark.json
+/easypojo2sheet-benchmarks/dependency-reduced-pom.xml
+/easypojo2sheet-benchmarks/target/
+/easypojo2sheet-examples/target/
+/easypojo2sheet-core/target/
