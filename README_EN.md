@@ -1,11 +1,12 @@
 
 
 <div align="center">
-  <img src="easypojo2sheet-core/.github/assets/logo.png" alt="EasyPojo2Sheet" width="320"/>
+  <img src=".github/assets/logo.png" alt="EasyPojo2Sheet" width="320"/>
   <br><br>
   <p><strong>Simple and powerful Java library to export POJOs to Excel</strong></p>
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.calazans/EasyPojo2Sheet?color=0a7a4b&label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.calazans/EasyPojo2Sheet)
+[![codecov](https://codecov.io/github/calazans/EasyPojo2Sheet/branch/main/graph/badge.svg?token=1Y7G60N1O1)](https://codecov.io/github/calazans/EasyPojo2Sheet)
 [![Java](https://img.shields.io/badge/Java-17%2B-0a7a4b?logo=openjdk)](https://openjdk.org/)
 [![License](https://img.shields.io/github/license/calazans/EasyPojo2Sheet?color=0a7a4b)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/calazans/EasyPojo2Sheet?style=social)](https://github.com/calazans/EasyPojo2Sheet/stargazers)
