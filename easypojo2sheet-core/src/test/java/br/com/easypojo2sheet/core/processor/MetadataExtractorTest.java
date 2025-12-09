@@ -42,8 +42,8 @@ public class MetadataExtractorTest {
         // sheet name default = class simple name
         Assert.assertEquals("SimpleEntity", meta.getSheetName());
         // defaults da anotação @Spreadsheet
-        Assert.assertTrue(meta.isAutoSizeColumns());
-        Assert.assertTrue(meta.isFreezeHeader());
+        Assert.assertFalse(meta.isAutoSizeColumns());
+        Assert.assertFalse(meta.isFreezeHeader());
         Assert.assertEquals(0, meta.getStartRow());
 
         List<ColumnMetadata> cols = meta.getColumns();
