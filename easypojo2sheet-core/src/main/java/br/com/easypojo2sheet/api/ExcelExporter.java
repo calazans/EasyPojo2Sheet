@@ -4,7 +4,6 @@ import br.com.easypojo2sheet.core.metadata.SheetMetadata;
 import br.com.easypojo2sheet.core.processor.MetadataExtractor;
 import br.com.easypojo2sheet.core.writer.Writer;
 import br.com.easypojo2sheet.core.writer.excel.ExcelStreamingWriter;
-import br.com.easypojo2sheet.core.writer.excel.ExcelWriter;
 import br.com.easypojo2sheet.exception.ExcelExportException;
 
 import java.io.IOException;
@@ -38,7 +37,7 @@ public class ExcelExporter<T> {
             // Valida limite de linhas (524k)
             if (data.size() > 1048576) {
                 throw new ExcelExportException(
-                    "Limite de 524.288 linhas excedido (" + data.size() + " linhas). Considere usar modo streaming ou paginar os dados."
+                    "Limite de 1048576 linhas excedido (" + data.size() + " linhas). Considere usar modo streaming ou paginar os dados."
                 );
             }
 
@@ -50,8 +49,7 @@ public class ExcelExporter<T> {
             // TODO: Aplicar locale para formatação
 
             // Cria writer e escreve
-            Writer writer = (config.isStreamingMode()? new ExcelStreamingWriter(metadata, config.getRowAccessWindowSize())
-                    :new ExcelWriter(metadata));
+            Writer writer = new ExcelStreamingWriter(metadata, config.getRowAccessWindowSize());
             writer.write(data);
 
             // Salva em arquivo ou stream

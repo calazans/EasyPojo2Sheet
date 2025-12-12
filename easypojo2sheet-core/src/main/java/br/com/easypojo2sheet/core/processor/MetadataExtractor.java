@@ -1,6 +1,7 @@
 
 package br.com.easypojo2sheet.core.processor;
 
+import br.com.easypojo2sheet.annotation.SheetColumns;
 import br.com.easypojo2sheet.annotation.Spreadsheet;
 import br.com.easypojo2sheet.annotation.SheetColumn;
 import br.com.easypojo2sheet.annotation.SheetIgnore;
@@ -50,34 +51,20 @@ public class MetadataExtractor {
                 continue;
             }
 
-            // Campos sem @SheetColumn são incluídos com valores padrão
-            SheetColumn columnAnnotation = field.getAnnotation(SheetColumn.class);
-            
-            var columnName = field.getName();
-            var order = Integer.MAX_VALUE;
-            var width = -1;
-            var propertyPath = "";
-            var dateFormat = "";
-            var numberFormat = "";
-            var horizontalAlignment=HorizontalAlignment.AUTO;
-            var verticalAlignment = br.com.easypojo2sheet.model.enums.VerticalAlignment.CENTER;
-
-            if (columnAnnotation != null) {
-                columnName = columnAnnotation.name().isEmpty()? field.getName(): columnAnnotation.name();
-                order = columnAnnotation.order();
-                width = columnAnnotation.width();
-                propertyPath = columnAnnotation.property();
-                dateFormat = columnAnnotation.dateFormat();
-                numberFormat = columnAnnotation.numberFormat();
-                horizontalAlignment = columnAnnotation.align();
-                verticalAlignment = columnAnnotation.valign();
+            SheetColumns sheetColumnsAnnotation = field.getAnnotation(SheetColumns.class);
+            // Campos que possuem mais de uma anotacao que são campos de objetos aninhados
+            if (sheetColumnsAnnotation != null) {
+                for(SheetColumn column : sheetColumnsAnnotation.value()){
+                    createColumnMetadata(field, column, columns);
+                }
             }
-            field.setAccessible(true);
-            
-            columns.add(new ColumnMetadata(
-                field, columnName, order, width, propertyPath,
-                dateFormat, numberFormat, horizontalAlignment, verticalAlignment
-            ));
+
+            if (sheetColumnsAnnotation == null) {
+                // Campos sem @SheetColumn são incluídos com valores padrão
+                SheetColumn columnAnnotation = field.getAnnotation(SheetColumn.class);
+                createColumnMetadata(field, columnAnnotation, columns);
+            }
+
         }
 
         // Ordena por order, depois por nome
@@ -87,5 +74,33 @@ public class MetadataExtractor {
         );
 
         return columns;
+    }
+
+    private static void createColumnMetadata(Field field, SheetColumn columnAnnotation, List<ColumnMetadata> columns) {
+        var columnName = field.getName();
+        var order = Integer.MAX_VALUE;
+        var width = -1;
+        var propertyPath = "";
+        var dateFormat = "";
+        var numberFormat = "";
+        var horizontalAlignment=HorizontalAlignment.AUTO;
+        var verticalAlignment = br.com.easypojo2sheet.model.enums.VerticalAlignment.CENTER;
+
+        if (columnAnnotation != null) {
+            columnName = columnAnnotation.name().isEmpty()? field.getName(): columnAnnotation.name();
+            order = columnAnnotation.order();
+            width = columnAnnotation.width();
+            propertyPath = columnAnnotation.property();
+            dateFormat = columnAnnotation.dateFormat();
+            numberFormat = columnAnnotation.numberFormat();
+            horizontalAlignment = columnAnnotation.align();
+            verticalAlignment = columnAnnotation.valign();
+        }
+        field.setAccessible(true);
+
+        columns.add(new ColumnMetadata(
+                field, columnName, order, width, propertyPath,
+            dateFormat, numberFormat, horizontalAlignment, verticalAlignment
+        ));
     }
 }

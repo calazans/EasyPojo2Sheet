@@ -3,16 +3,14 @@ package br.com.easypojo2sheet.annotation;
 import br.com.easypojo2sheet.model.enums.HorizontalAlignment;
 import br.com.easypojo2sheet.model.enums.VerticalAlignment;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Anotação para configurar como um campo é exportado para uma coluna da planilha.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
+@Repeatable(SheetColumns.class)
 public @interface SheetColumn {
     
     /**

@@ -3,6 +3,7 @@ package br.com.easypojo2sheet.core.writer.excel;
 
 import br.com.easypojo2sheet.core.metadata.ColumnMetadata;
 import br.com.easypojo2sheet.core.metadata.SheetMetadata;
+import br.com.easypojo2sheet.core.util.PropertyExtractor;
 import br.com.easypojo2sheet.core.writer.Writer;
 import br.com.easypojo2sheet.exception.ExcelExportException;
 import org.apache.poi.ss.usermodel.*;
@@ -117,9 +118,9 @@ public class ExcelStreamingWriter implements Writer {
             return null;
         }
 
-        String propertyPath = column.getPropertyPath();
-        if (propertyPath != null && !propertyPath.isEmpty()) {
-            return extractNestedValue(item, propertyPath);
+
+        if (column.hasPropertyPath()) {
+            return PropertyExtractor.extractValue(item, column.getPropertyPath());
         }
 
         Field field = column.getField();
@@ -127,24 +128,6 @@ public class ExcelStreamingWriter implements Writer {
         return field.get(item);
     }
 
-    /**
-     * Extrai valor de propriedade aninhada (ex: "vendedor.nome").
-     */
-    private Object extractNestedValue(Object item, String propertyPath) throws Exception {
-        String[] parts = propertyPath.split("\\.");
-        Object current = item;
-
-        for (String part : parts) {
-            if (current == null) {
-                return null;
-            }
-            Field field = current.getClass().getDeclaredField(part);
-            field.setAccessible(true);
-            current = field.get(current);
-        }
-
-        return current;
-    }
 
     /**
      * Define o valor da célula com formatação e estilo cacheado.
@@ -161,7 +144,6 @@ public class ExcelStreamingWriter implements Writer {
 
     /**
      * Ajusta largura das colunas.
-     * ATENÇÃO: autoSizeColumn é custoso com SXSSF, use com cuidado!
      */
     private void autoSizeColumns(Sheet sheet) {
 
