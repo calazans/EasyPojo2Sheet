@@ -22,3 +22,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./easypojo2sheet-core/target/site/jacoco/jacoco.xml
+          flags: core
+          name: codecov-core
+          fail_ci_if_error: true
