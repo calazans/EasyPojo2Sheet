@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.github.calazans</groupId>
         <artifactId>easypojo2sheet-parent</artifactId>
-        <version>1.0.0-SNAPSHOT-RC03</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>easypojo2sheet-examples</artifactId>
