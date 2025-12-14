@@ -8,7 +8,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.calazans/EasyPojo2Sheet?color=0a7a4b&label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.calazans/EasyPojo2Sheet)
 [![codecov](https://codecov.io/github/calazans/EasyPojo2Sheet/branch/main/graph/badge.svg?token=1Y7G60N1O1)](https://codecov.io/github/calazans/EasyPojo2Sheet)
 [![Java](https://img.shields.io/badge/Java-17%2B-0a7a4b?logo=openjdk)](https://openjdk.org/)
-[![License](https://img.shields.io/github/license/calazans/EasyPojo2Sheet?color=0a7a4b)](LICENSE)
+[![License](https://img.shields.io/github/license/calazans/EasyPojo2Sheet?color=0a7a4b "License")](LICENSE.md)
 [![Stars](https://img.shields.io/github/stars/calazans/EasyPojo2Sheet?style=social)](https://github.com/calazans/EasyPojo2Sheet/stargazers)
 
 ---
@@ -35,6 +35,9 @@
 - ❄️ **Native freeze pane** - Freeze headers automatically
 - 📏 **Smart auto-size** - Automatic column width adjustment
 - 🔧 **Framework-agnostic** - Works with Spring Boot, Quarkus, Micronaut, Jakarta EE, and plain Java
+- 🔗 **Nested properties** - Access deeply nested data using dot notation
+- 📊 **Advanced aggregations** - Sum, avg, min, max, count/size, join and distinct join on lists
+- 🎯 **Flexible list rendering strategies** - Expand lists into multiple rows or aggregate values
 
 ---
 ## ⚡ Performance and Benchmarks
@@ -48,7 +51,7 @@ JMH benchmarks comparing EasyPojo2Sheet with Apache POI, EasyExcel, and FastExce
 - 🎯 **Ideal for typical enterprise use cases** where maintainability is a priority
 - 🐳 **Perfect for memory-constrained environments** such as containers and serverless
 
-> **Note**: While we are not the fastest library in absolute terms, EasyPojo2Sheet prioritizes developer productivity and efficient resource usage over performance micro-optimizations.
+> **Note**: While it is not the fastest library in absolute terms, EasyPojo2Sheet prioritizes developer productivity and efficient resource usage over performance micro-optimizations.
 
 ## 📦 Installation
 
@@ -68,25 +71,24 @@ JMH benchmarks comparing EasyPojo2Sheet with Apache POI, EasyExcel, and FastExce
 ### 1. Annotate your class
 
 ```java
-import br.com.easypojo2sheet.core.annotations.SpreadSheet;
-import br.com.easypojo2sheet.core.annotations.Column;
+import br.com.easypojo2sheet.annotation.Spreadsheet;
+import br.com.easypojo2sheet.annotation.SheetColumn;
 
-@SpreadSheet(name = "Sales Report", autoSizeColumns = true, freezeHeader = true)
+@Spreadsheet(name = "Sales Report", autoSizeColumns = true, freezeHeader = true)
 public class Sale {
-
-    @Column(header = "ID", order = 1)
+    @SheetColumn(name = "ID", order = 1)
     private Long id;
 
-    @Column(header = "Product", order = 2)
+    @SheetColumn(name = "Product", order = 2)
     private String product;
 
-    @Column(header = "Quantity", order = 3)
+    @SheetColumn(name = "Quantity", order = 3)
     private Integer quantity;
 
-    @Column(header = "Amount", order = 4, format = "$ #,##0.00")
-    private Double amount;
+    @SheetColumn(name = "Amount", order = 4, numberFormat = "$ #,##0.00")
+    private BigDecimal amount;
 
-    @Column(header = "Date", order = 5, format = "MM/dd/yyyy")
+    @SheetColumn(name = "Date", order = 5, dateFormat = "MM/dd/yyyy")
     private LocalDate date;
 
     // Getters and Setters
@@ -101,7 +103,6 @@ import br.com.easypojo2sheet.core.ExcelExporter;
 import java.util.List;
 
 public class ExportExample {
-
     public void exportSales() throws Exception {
         // Your data
         List<Sale> sales = List.of(
@@ -110,10 +111,14 @@ public class ExportExample {
                 new Sale(3L, "Keyboard", 10, 150.00, LocalDate.now())
         );
 
-        // Export in one line
-        ExcelExporter.export(sales, "sales-report.xlsx");
+        // Export using the builder pattern
+        ExcelExporter.<Sale>builder()
+                .data(sales)
+                .outputFile("sales-report.xlsx")
+                .build()
+                .export();
 
-        System.out.println("✅ Spreadsheet generated successfully!");
+        System.out.println("Spreadsheet generated successfully!");
     }
 }
 ```
@@ -128,25 +133,232 @@ An Excel spreadsheet will be created with:
 
 ---
 
-### Calculated Fields and Conditional Formatting
+## 🎯 Advanced Features
+
+### 🔗 Nested Properties
+
+Access properties of complex objects using dot notation:
 
 ```java
-@SpreadSheet(name = "Performance Analysis")
+@Spreadsheet(name = "Sales Report")
+public class Sale {
+    @SheetColumn(name = "Customer", order = 1)
+    private String customerName;
+
+    // Access nested property from seller object
+    @SheetColumn(name = "Seller", order = 2, property = "seller.name")
+    @SheetColumn(name = "Seller SSN", order = 3, property = "seller.ssn")
+    private Employee seller;
+
+    // ... other fields
+}
+
+public class Employee {
+    private String name;
+    private String ssn;
+    // getters and setters
+}
+```
+
+### 📊 List Aggregations
+
+Perform powerful aggregations on collections without extra code:
+
+```java
+@Spreadsheet(name = "Products Report")
+public class Order {
+    @SheetColumn(name = "Order No.", order = 1)
+    private Long number;
+
+    // Sum of values
+    @SheetColumn(name = "Total Amount", order = 2,
+            property = "items.sum.amount",
+            numberFormat = "$ #,##0.00")
+
+    // Average price
+    @SheetColumn(name = "Average Price", order = 3,
+            property = "items.avg.amount",
+            numberFormat = "$ #,##0.00")
+
+    // Minimum price
+    @SheetColumn(name = "Min Price", order = 4,
+            property = "items.min.amount",
+            numberFormat = "$ #,##0.00")
+
+    // Maximum price
+    @SheetColumn(name = "Max Price", order = 5,
+            property = "items.max.amount",
+            numberFormat = "$ #,##0.00")
+
+    // Join names
+    @SheetColumn(name = "Products", order = 6,
+            property = "items.join.name",
+            separator = "; ")
+
+    // Distinct categories joined
+    @SheetColumn(name = "Categories", order = 7,
+            property = "items.distinct_join.category",
+            separator = ", ")
+
+    private List<OrderItem> items;
+}
+
+public class OrderItem {
+    private Long number;
+    private String name;
+    private String category;
+    private BigDecimal amount;
+    // getters and setters
+}
+```
+
+#### 📋 Available Aggregations
+
+| Aggregation     | Description                 | Example                          |
+|-----------------|-----------------------------|----------------------------------|
+| `sum`           | Sum numeric values          | `products.sum.price`             |
+| `avg`           | Average of numeric values   | `products.avg.price`             |
+| `min`           | Minimum value               | `products.min.price`             |
+| `max`           | Maximum value               | `products.max.price`             |
+| `size`          | List size                   | `products.size`                  |
+| `join`          | Join values                 | `products.join.name`             |
+| `distinct_join` | Join distinct values        | `products.distinct_join.category`|
+
+### 🎨 List Rendering Strategies
+
+Control how lists are rendered in the spreadsheet:
+
+```java
+@Spreadsheet(name = "Detailed Sales")
+public class DetailedSale {
+    @SheetColumn(name = "Sale Code", order = 1)
+    private Long id;
+
+    @SheetColumn(name = "Customer", order = 2)
+    private String customer;
+
+    // EXPAND_ROWS: Creates one row per product
+    @SheetColumn(name = "Product", order = 3,
+            property = "name",
+            listStrategy = ListRenderStrategy.EXPAND_ROWS)
+
+    @SheetColumn(name = "Price", order = 4,
+            property = "amount",
+            numberFormat = "$ #,##0.00",
+            listStrategy = ListRenderStrategy.EXPAND_ROWS)
+
+    private List<Product> products;
+}
+```
+
+Result with EXPAND_ROWS:
+
+| Sale Code | Customer | Product  | Price      |
+|-----------|----------|----------|------------|
+| 1         | John     | Laptop   | $ 3,500.00 |
+|           |          | Mouse    | $ 45.90    |
+|           |          | Keyboard | $ 150.00   |
+| 2         | Mary     | Monitor  | $ 800.00   |
+
+#### 📋 Available Strategies
+
+| Strategy                         | Description                              | Usage                                      |
+|----------------------------------|------------------------------------------|--------------------------------------------|
+| `AGGREGATE`                      | Uses aggregations (sum, join, etc.)      | Default when there is an aggregation       |
+| `EXPAND_ROWS`                    | Creates one row per item                 | Ideal for detailed lists                   |
+| `EXPAND_ROWS_WITH_MERGED_ROWS`   | Expands and merges non-list cells        | Cleaner visual layout                      |
+| `IGNORE`                         | Ignores the list                         | For non-relevant lists                     |
+
+### 🔢 Index Access and Special Tokens
+
+Access specific elements from lists:
+
+```java
+@Spreadsheet(name = "Analysis")
+public class Analysis {
+    // First element
+    @SheetColumn(name = "First Product", order = 1, property = "products.first.name")
+
+    // Last element
+    @SheetColumn(name = "Last Product", order = 2, property = "products.last.name")
+
+    // List size
+    @SheetColumn(name = "Total Products", order = 3, property = "products.size")
+
+    // Specific index
+    @SheetColumn(name = "Second Product", order = 4, property = "products[1].name")
+    private List<Product> products;
+}
+```
+
+### 🎭 Calculated Fields and Methods
+
+```java
+@Spreadsheet(name = "Performance")
 public class Performance {
-    
-    @Column(header = "Salesperson", order = 1)
+    @SheetColumn(name = "Salesperson", order = 1)
     private String salesperson;
-    
-    @Column(header = "Target", order = 2, format = "#,##0")
+
+    @SheetColumn(name = "Target", order = 2, numberFormat = "#,##0")
     private Integer target;
-    
-    @Column(header = "Achieved", order = 3, format = "#,##0")
+
+    @SheetColumn(name = "Achieved", order = 3, numberFormat = "#,##0")
     private Integer achieved;
-    
-    @Column(header = "Achievement %", order = 4, format = "0.00%")
+
+    // Annotated method is exported as a column
+    @SheetColumn(name = "% Achievement", order = 4, numberFormat = "0.00%")
     public Double getAchievementPercentage() {
         return target > 0 ? (double) achieved / target : 0.0;
     }
+
+    @SheetColumn(name = "Status", order = 5)
+    public String getStatus() {
+        double p = getAchievementPercentage();
+        if (p >= 1.0) return "Target Met";
+        if (p >= 0.8) return "Near Target";
+        return "Below Target";
+    }
+}
+```
+
+### ♻️ Multiple Columns from the Same Field
+
+Use `@SheetColumns` to create multiple columns from a single field:
+
+```java
+@Spreadsheet(name = "Full Report")
+public class FullReport {
+    @SheetColumn(name = "Grand Total", order = 1,
+            property = "items.sum.amount",
+            numberFormat = "$ #,##0.00")
+    @SheetColumn(name = "Average Price", order = 2,
+            property = "items.avg.amount",
+            numberFormat = "$ #,##0.00")
+    @SheetColumn(name = "Items Qty", order = 3,
+            property = "items.size")
+    private List<Item> items;
+}
+```
+
+### 🚫 Ignore Fields
+
+Use `@SheetIgnore` to exclude fields from the export:
+
+```java
+@Spreadsheet(name = "Sales")
+public class Sale {
+    @SheetColumn(name = "ID", order = 1)
+    private Long id;
+
+    @SheetColumn(name = "Amount", order = 2, numberFormat = "$ #,##0.00")
+    private BigDecimal amount;
+
+    // Ignored field
+    @SheetIgnore
+    private String internalNotes;
+
+    @SheetIgnore
+    private byte[] sensitiveData;
 }
 ```
 
@@ -156,33 +368,100 @@ public class Performance {
 
 ### Available Annotations
 
-#### `@SpreadSheet`
-Defines spreadsheet configurations.
+#### `@Spreadsheet`
+Defines sheet-level configurations.
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `name` | String | Class name | Sheet tab name |
-| `autoSizeColumns` | boolean | `false` | Auto-adjust width |
+| `autoSizeColumns` | boolean | `false` | Auto-adjust column width |
 | `freezeHeader` | boolean | `false` | Freeze header row |
-| `startRow` | int | `0` | Starting row for data |
+| `startRow` | int | `0` | Starting row for data (0-based) |
 
-#### `@Column`
-Defines each column's configurations.
+#### `@SheetColumn`
+Defines column-level configurations.
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `header` | String | Field name | Column title |
-| `order` | int | `0` | Display order |
-| `format` | String | - | Display format (date, number, etc.) |
-| `width` | int | `-1` | Fixed column width |
-| `ignored` | boolean | `false` | Ignore field in export |
+| `name` | String | Field name | Column title |
+| `order` | int | `Integer.MAX_VALUE` | Display order |
+| `property` | String | `""` | Path to nested property |
+| `dateFormat` | String | `""` | Date format (SimpleDateFormat) |
+| `numberFormat` | String | `""` | Number format (DecimalFormat) |
+| `width` | int | `-1` | Fixed column width (-1 = auto) |
+| `align` | HorizontalAlignment | `AUTO` | Horizontal alignment |
+| `valign` | VerticalAlignment | `CENTER` | Vertical alignment |
+| `separator` | String | `", "` | Separator used in JOIN aggregations |
+| `listStrategy` | ListRenderStrategy | `AGGREGATE` | List rendering strategy |
+
+#### `@SheetColumns`
+Container for multiple `@SheetColumn` annotations on the same field.
+
+#### `@SheetIgnore`
+Marks a field to be ignored during export.
+
+### Configuration Enums
+
+#### `HorizontalAlignment`
+- `LEFT` - Left-aligned
+- `CENTER` - Center-aligned
+- `RIGHT` - Right-aligned
+- `AUTO` - Automatic based on data type
+
+#### `VerticalAlignment`
+- `TOP` - Top-aligned
+- `CENTER` - Center-aligned
+- `BOTTOM` - Bottom-aligned
+
+#### `ListRenderStrategy`
+- `AGGREGATE` - Uses aggregations (default)
+- `EXPAND_ROWS` - Expands into multiple rows
+- `EXPAND_ROWS_WITH_MERGED_ROWS` - Expands with merged non-list cells
+- `IGNORE` - Ignores the list
+
+### Builder API
+
+```java
+ExcelExporter.builder()
+  .data(List) // Data to export (required)
+  .outputFile(String) // Output file path
+  .outputStream(OutputStream) // Alternative output stream
+  .rowAccessWindowSize(int) // Streaming window size (default: 100)
+  .build()
+  .export();
+```
+
+---
+
+## 🛡️ Error Handling
+
+The library provides specialized exceptions:
+
+```java
+try {
+    ExcelExporter.builder()
+        .data(sales)
+        .outputFile("report.xlsx")
+        .build()
+        .export();
+} catch (ExcelExportException e) { // Error during export
+    log.error("Failed to generate Excel: {}", e.getMessage());
+} catch (PropertyExtractionException e) { // Error accessing nested properties
+    log.error("Invalid property: {}", e.getMessage());
+}
+```
+
+### Available Exceptions
+
+- `ExcelExportException` - General export error
+- `PropertyExtractionException` - Error extracting nested properties
 
 ---
 
 ##  Requirements
 
 - **Java**: 17 or higher
-- **Maven**: 3.6+ (or Gradle 7+)
+- **Maven**: 3.6+
 
 ---
 
@@ -205,6 +484,18 @@ mvn javadoc:javadoc
 
 ---
 
+## 📊 Roadmap
+
+- [ ] Support for multiple sheets in a single file
+- [ ] Custom styles via annotations
+- [ ] Excel formulas support
+- [ ] Data validation in cells
+- [ ] Export to CSV and other formats
+- [ ] Excel import to POJOs
+- [ ] Internationalization (i18n) support
+
+---
+
 ##  Contributing
 
 Contributions are welcome! Feel free to:
@@ -221,6 +512,8 @@ Contributions are welcome! Feel free to:
 - Keep test coverage above 80%
 - Follow Java code conventions
 - Document public APIs with JavaDoc
+- Use descriptive commit messages
+- Run all tests before submitting a PR
 
 ---
 
@@ -233,12 +526,13 @@ Found a bug? [Open an issue](https://github.com/calazans/EasyPojo2Sheet/issues) 
 - Steps to reproduce
 - Java and library version
 - Sample code (if possible)
+- Screenshots (if relevant)
 
 ---
 
 ##  License
 
-This project is licensed under the [Apache License 2.0](LICENSE) - see the LICENSE file for details.
+This project is licensed under the [Apache License 2.0](LICENSE.md) - see the LICENSE.md file for details.
 
 ---
 
@@ -253,12 +547,21 @@ This project is licensed under the [Apache License 2.0](LICENSE) - see the LICEN
 
 ## ⭐ Support the Project
 
-If this project was useful to you, consider giving it a ⭐ on GitHub!
+If this project was useful to you:
+- ⭐ Give it a star on GitHub
+- 🐛 Report bugs and suggest improvements
+- 🤝 Contribute with code
+- 📢 Share it with other developers
+
+---
+
+## 🙏 Acknowledgements
+
+Special thanks to all the [contributors](https://github.com/calazans/EasyPojo2Sheet/graphs/contributors) who helped make this project better!
 
 ---
 
 <div align="center">
   <sub>Made with ❤️ by <a href="https://github.com/calazans">Diogo Calazans</a></sub>
 </div>
-```
  
