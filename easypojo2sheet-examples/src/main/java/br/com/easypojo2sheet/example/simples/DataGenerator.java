@@ -53,7 +53,7 @@ public class DataGenerator {
         return lst;
     }
 
-    private List<Produto> gerarListaDeProdutos(int qtd) {
+    public List<Produto> gerarListaDeProdutos(int qtd) {
         List<Produto> lst = new ArrayList<>(qtd);
         for (int i = 0; i < qtd; i++) {
             lst.add(
