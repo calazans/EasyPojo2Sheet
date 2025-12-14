@@ -201,48 +201,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Geração de Sources JAR (obrigatório para Maven Central) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>${maven-source-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Geração de JavaDoc JAR (obrigatório para Maven Central) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-javadoc-plugin.version}</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <docencoding>${project.reporting.outputEncoding}</docencoding>
-                    <charset>${project.reporting.outputEncoding}</charset>
-                    <show>public</show>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <source>${maven.compiler.source}</source>
-                    <links>
-                        <link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
-                        <link>https://poi.apache.org/apidocs/dev/</link>
-                    </links>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 
             <!-- Testes -->
             <plugin>
@@ -297,6 +255,58 @@
             <id>release</id>
             <build>
                 <plugins>
+                    <!-- Geração de Sources JAR (obrigatório para Maven Central) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${maven-source-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Geração de JavaDoc JAR (obrigatório para Maven Central) -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven-javadoc-plugin.version}</version>
+                        <configuration>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                            <docencoding>${project.reporting.outputEncoding}</docencoding>
+                            <charset>${project.reporting.outputEncoding}</charset>
+                            <show>public</show>
+                            <quiet>true</quiet>
+                            <doclint>none</doclint>
+                            <source>${maven.compiler.source}</source>
+                            <links>
+                                <link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
+                                <link>https://poi.apache.org/apidocs/dev/</link>
+                            </links>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.9.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -309,6 +319,12 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
