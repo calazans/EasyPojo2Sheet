@@ -1,18 +1,17 @@
 package br.com.easypojo2sheet.annotation;
 
 import br.com.easypojo2sheet.model.enums.HorizontalAlignment;
+import br.com.easypojo2sheet.model.enums.ListRenderStrategy;
 import br.com.easypojo2sheet.model.enums.VerticalAlignment;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Anotação para configurar como um campo é exportado para uma coluna da planilha.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD,ElementType.METHOD})
+@Repeatable(SheetColumns.class)
 public @interface SheetColumn {
     
     /**
@@ -69,4 +68,22 @@ public @interface SheetColumn {
      * @return alinhamento vertical
      */
     VerticalAlignment valign() default VerticalAlignment.CENTER;
+
+    /**
+     * Separador para agregações do tipo JOIN.
+     * Exemplo: separator = "; " para produtos.join.nome
+     *
+     * @return separador, ", " por padrão
+     */
+    String separator() default ", ";
+
+    /**
+     * Estratégia de renderização para listas.
+     * - AGGREGATE: usa property com agregações (padrão)
+     * - EXPAND_ROWS: cria uma linha para cada item da lista
+     * - IGNORE: ignora a lista
+     *
+     * @return estratégia de renderização
+     */
+    ListRenderStrategy listStrategy() default ListRenderStrategy.AGGREGATE;
 }

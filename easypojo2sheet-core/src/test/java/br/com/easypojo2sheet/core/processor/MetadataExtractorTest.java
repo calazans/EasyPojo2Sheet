@@ -72,9 +72,9 @@ public class MetadataExtractorTest {
         Assert.assertEquals("plainField", col2.getColumnName());
         Assert.assertEquals(Integer.MAX_VALUE, col2.getOrder());
         Assert.assertEquals(-1, col2.getWidth());
-        Assert.assertEquals("", col2.getPropertyPath());
-        Assert.assertEquals("", col2.getDateFormat());
-        Assert.assertEquals("", col2.getNumberFormat());
+        Assert.assertNull(col2.getPropertyPath());
+        Assert.assertNull( col2.getDateFormat());
+        Assert.assertNull( col2.getNumberFormat());
         Assert.assertEquals(HorizontalAlignment.AUTO, col2.getHorizontalAlignment());
         Assert.assertEquals(VerticalAlignment.CENTER, col2.getVerticalAlignment());
 

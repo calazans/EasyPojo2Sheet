@@ -1,4 +1,4 @@
-package br.com.easypojo2sheet.example;
+package br.com.easypojo2sheet.example.simples;
 
 import br.com.easypojo2sheet.api.ExcelExporter;
 

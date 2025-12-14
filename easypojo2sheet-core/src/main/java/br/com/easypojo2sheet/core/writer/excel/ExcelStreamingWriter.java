@@ -3,9 +3,16 @@ package br.com.easypojo2sheet.core.writer.excel;
 
 import br.com.easypojo2sheet.core.metadata.ColumnMetadata;
 import br.com.easypojo2sheet.core.metadata.SheetMetadata;
+import br.com.easypojo2sheet.core.util.PropertyExtractor;
 import br.com.easypojo2sheet.core.writer.Writer;
 import br.com.easypojo2sheet.exception.ExcelExportException;
-import org.apache.poi.ss.usermodel.*;
+import br.com.easypojo2sheet.model.enums.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -64,6 +71,11 @@ public class ExcelStreamingWriter implements Writer {
             writeData(sheet, data);
             autoSizeColumns(sheet);
 
+            // Congela header se configurado
+            if (metadata.isFreezeHeader()) {
+                sheet.createFreezePane(0, metadata.getStartRow() + 1);
+            }
+
         } catch (Exception e) {
             throw new ExcelExportException("Erro ao escrever dados no Excel", e);
         }
@@ -87,17 +99,128 @@ public class ExcelStreamingWriter implements Writer {
 
 
     /**
-     * Escreve os dados nas linhas com processamento em batch.
+     * Escreve os dados nas linhas.
      */
     private <T> void writeData(Sheet sheet, List<T> data) throws ExcelExportException {
-        int rowIndex = 1;
+        List<ColumnMetadata> columns = metadata.getColumns();
+
+        // Verifica se há colunas para expandir
+        boolean hasExpandColumns = columns.stream().anyMatch(ColumnMetadata::shouldExpandRows);
+
+        if (hasExpandColumns) {
+            writeExpandedData(sheet, data, columns);
+        } else {
+            writeSimpleData(sheet, data, columns);
+        }
+    }
+
+
+    private <T> void writeExpandedData(Sheet sheet, List<T> data, List<ColumnMetadata> columns) throws ExcelExportException {
+        int rowNum = metadata.getStartRow() + 1;
+
+        // Expande as linhas
+        List<RowExpander.ExpandedRow<T>> expandedRows = RowExpander.expandRows(data, columns);
+        int firstRowInGroup = rowNum;
+
+        // Escreve cada linha expandida
+        for (int i = 0; i < expandedRows.size(); i++) {
+            RowExpander.ExpandedRow<T> expandedRow = expandedRows.get(i);
+            Row row = sheet.createRow(rowNum);
+
+            if (expandedRow.isFirstRow()) {
+                firstRowInGroup = rowNum;
+            }
+
+            for (int colNum = 0; colNum < columns.size(); colNum++) {
+                ColumnMetadata column = columns.get(colNum);
+                Cell cell = row.createCell(colNum);
+
+                try {
+                    Object value = extractExpandedValue(expandedRow, column);
+
+                    // Só preenche a célula se for a primeira linha do grupo
+                    // ou se for uma coluna da lista expandida
+                    if (expandedRow.isFirstRow() || column.shouldExpandRows()) {
+                        setCellValue(cell, value, column);
+                    }
+
+                } catch (Exception e) {
+                    throw new ExcelExportException(
+                            "Erro ao extrair valor do campo " + column.getField().getName(), e
+                    );
+                }
+            }
+
+            rowNum++;
+
+            // Aplica merge nas colunas que não são da lista expandida
+            if (expandedRow.isLastRow() && expandedRow.shouldMerge()) {
+                int lastRowInGroup = rowNum - 1;
+
+                // Só faz merge se houver mais de uma linha no grupo
+                if (firstRowInGroup < lastRowInGroup) {
+                    for (int colNum = 0; colNum < columns.size(); colNum++) {
+                        ColumnMetadata column = columns.get(colNum);
+
+                        // Merge apenas colunas que NÃO são da lista expandida
+                        if (!column.shouldExpandRows()) {
+                            // Obter o estilo da primeira célula do grupo
+                            Row firstRow = sheet.getRow(firstRowInGroup);
+                            Cell firstCell = firstRow.getCell(colNum);
+                            CellStyle originalStyle = firstCell != null ? firstCell.getCellStyle() : null;
+
+                            CellRangeAddress mergeRegion = new CellRangeAddress(
+                                    firstRowInGroup,
+                                    lastRowInGroup,
+                                    colNum,
+                                    colNum
+                            );
+                            sheet.addMergedRegion(mergeRegion);
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private Object extractExpandedValue(RowExpander.ExpandedRow<?> expandedRow, ColumnMetadata column)
+            throws Exception {
+
+        // Se é uma coluna da lista expandida, extrai do item da lista
+        if (column.shouldExpandRows()) {
+            Object listItem = expandedRow.getListItem();
+
+            if (listItem == null) {
+                return null;
+            }
+
+            // Se há propertyPath, usa ele para navegar no item da lista
+            if (column.hasPropertyPath()) {
+                return PropertyExtractor.extractValue(listItem, column.getPropertyPath(), column.getSeparator());
+            }
+
+            // Caso contrário, retorna o próprio item
+            return listItem;
+        }
+
+        // Para colunas normais, extrai do objeto original
+        return extractValue(expandedRow.getOriginalItem(), column);
+    }
+
+    /**
+     * Escreve os dados nas linhas com processamento em batch.
+     */
+    private <T> void writeSimpleData(Sheet sheet, List<T> data, List<ColumnMetadata> columns) throws ExcelExportException {
+        int rowIndex = metadata.getStartRow() + 1;
         
         try {
             for (T item : data) {
                 Row row = sheet.createRow(rowIndex++);
                 int colIndex = 0;
 
-                for (ColumnMetadata column : metadata.getColumns()) {
+                for (ColumnMetadata column : columns) {
                     Cell cell = row.createCell(colIndex++);
                     Object value = extractValue(item, column);
                     setCellValue(cell, value, column);
@@ -117,9 +240,19 @@ public class ExcelStreamingWriter implements Writer {
             return null;
         }
 
-        String propertyPath = column.getPropertyPath();
-        if (propertyPath != null && !propertyPath.isEmpty()) {
-            return extractNestedValue(item, propertyPath);
+        if (column.isMethod()) {
+            Object methodValue = column.extractValue(item);
+
+            // Se há propertyPath, aplica navegação no resultado do método
+            if (column.hasPropertyPath()) {
+                return PropertyExtractor.extractValue(methodValue, column.getPropertyPath(), column.getSeparator());
+            }
+
+            return methodValue;
+        }
+
+        if (column.hasPropertyPath()) {
+            return PropertyExtractor.extractValue(item, column.getPropertyPath(),column.getSeparator());
         }
 
         Field field = column.getField();
@@ -127,24 +260,6 @@ public class ExcelStreamingWriter implements Writer {
         return field.get(item);
     }
 
-    /**
-     * Extrai valor de propriedade aninhada (ex: "vendedor.nome").
-     */
-    private Object extractNestedValue(Object item, String propertyPath) throws Exception {
-        String[] parts = propertyPath.split("\\.");
-        Object current = item;
-
-        for (String part : parts) {
-            if (current == null) {
-                return null;
-            }
-            Field field = current.getClass().getDeclaredField(part);
-            field.setAccessible(true);
-            current = field.get(current);
-        }
-
-        return current;
-    }
 
     /**
      * Define o valor da célula com formatação e estilo cacheado.
@@ -161,7 +276,6 @@ public class ExcelStreamingWriter implements Writer {
 
     /**
      * Ajusta largura das colunas.
-     * ATENÇÃO: autoSizeColumn é custoso com SXSSF, use com cuidado!
      */
     private void autoSizeColumns(Sheet sheet) {
 

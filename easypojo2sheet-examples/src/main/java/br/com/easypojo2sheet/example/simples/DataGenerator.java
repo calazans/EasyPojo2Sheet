@@ -1,4 +1,4 @@
-package br.com.easypojo2sheet.example;
+package br.com.easypojo2sheet.example.simples;
 
 import net.datafaker.Faker;
 
@@ -16,7 +16,9 @@ public class DataGenerator {
     public RelatorioVenda gerarRelatorioVenda() {
         Long id = FAKER.number().numberBetween(1L, 1_000_000L);
         LocalDate data = LocalDate.now().minusDays(FAKER.number().numberBetween(0, 30));
+
         String cliente = FAKER.name().fullName();
+
         Funcionario vendedor = new Funcionario(
                 FAKER.name().fullName(),
                 FAKER.cpf().valid()
@@ -26,10 +28,15 @@ public class DataGenerator {
         BigDecimal comissao = valor.multiply(BigDecimal.valueOf(0.10)).setScale(2, RoundingMode.HALF_UP);
         String obs = FAKER.lorem().sentence();
 
+
+
+
+
         return new RelatorioVenda(
                 id,
                 data,
                 cliente,
+                gerarListaDeProdutos(FAKER.number().numberBetween(1, 5)),
                 vendedor,
                 valor,
                 comissao,
@@ -43,6 +50,17 @@ public class DataGenerator {
             lst.add(gerarRelatorioVenda());
         }
 
+        return lst;
+    }
+
+    public List<Produto> gerarListaDeProdutos(int qtd) {
+        List<Produto> lst = new ArrayList<>(qtd);
+        for (int i = 0; i < qtd; i++) {
+            lst.add(
+              new Produto(FAKER.code().ean8(),FAKER.appliance().equipment(),FAKER.number().numberBetween(0d,100d))
+            );
+
+        }
         return lst;
     }
 }

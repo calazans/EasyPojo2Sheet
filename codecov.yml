@@ -1,0 +1,39 @@
+# Codecov configuration file
+# Documentation: https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  precision: 2  # Number of decimal places for coverage percentages
+  round: down   # How to round coverage percentages
+  range: "60...90"  # Color coding range (red to green)
+
+  status:
+    project:
+      default:
+        target: 75%           # Minimum coverage target for the entire project
+        threshold: 1%         # Allow coverage to drop by 1% before failing
+        base: auto            # Compare against base branch (main)
+        if_ci_failed: error   # Status if CI fails
+    
+    patch:
+      default:
+        target: 80%           # New code should have higher coverage
+        threshold: 0%         # Don't allow coverage to drop in new code
+        base: auto
+        if_ci_failed: error
+
+  ignore:
+    - "easypojo2sheet-examples/**/*"     # Exclude examples from coverage
+    - "easypojo2sheet-benchmarks/**/*"   # Exclude benchmarks from coverage
+    - "**/test/**"                       # Exclude test code
+    - "**/*Test.java"                    # Exclude test files
+    - "**/*Tests.java"
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default              # Post new comment for each commit
+  require_changes: false         # Comment even if coverage hasn't changed
+  require_base: false           # Comment even without base report
+  require_head: true            # Only comment if head report exists
+
+github_checks:
+  annotations: true             # Show coverage annotations in GitHub UI
