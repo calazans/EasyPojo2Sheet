@@ -9,6 +9,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+/**
+ * Utilitário para extração de valores de propriedades aninhadas, incluindo listas e agregações.
+ * Suporta notações como:
+ * - "vendedor.nome" (objeto aninhado)
+ * - "produtos[0].nome" (índice específico em lista)
+ * - "produtos.first.nome" (primeiro elemento)
+ * - "produtos.last.nome" (último elemento)
+ * - "produtos.size" (tamanho da lista)
+ * - "produtos.sum.preco" (soma valores)
+ * - "produtos.join.nome" (concatena valores)
+ */
 public class PropertyExtractor {
     private static final Pattern INDEX_PATTERN = Pattern.compile("(.+)\\[(\\d+)\\]");
 
@@ -20,6 +31,10 @@ public class PropertyExtractor {
      * @return o valor extraído ou null
      */
     public static Object extractValue(Object object, String propertyPath) {
+        return extractValue(object, propertyPath, ", ");
+    }
+
+    public static Object extractValue(Object object, String propertyPath,String separator) {
         if (object == null || propertyPath == null || propertyPath.isEmpty()) {
             return null;
         }
@@ -27,9 +42,24 @@ public class PropertyExtractor {
         String[] parts = propertyPath.split("\\.");
         Object current = object;
 
-        for (String part : parts) {
+        for (int i = 0; i < parts.length; i++) {
             if (current == null) {
                 return null;
+            }
+
+            String part = parts[i];
+
+            // Verifica se e uma agregacao
+            AggregationType aggregation = AggregationType.fromString(part);
+            if (aggregation != null && current instanceof List) {
+
+                // Se ha mais partes elas representam a propriedade a agregar
+                String remainingProperty = null;
+                if (i + 1 < parts.length) {
+                    remainingProperty = String.join(".", java.util.Arrays.copyOfRange(parts, i + 1, parts.length));
+                }
+
+                return aggregation.aggregate((List<?>) current, remainingProperty, separator);
             }
 
             current = extractSingleProperty(current, part);
