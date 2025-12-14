@@ -1,6 +1,7 @@
 package br.com.easypojo2sheet.core.metadata;
 
 import br.com.easypojo2sheet.model.enums.HorizontalAlignment;
+import br.com.easypojo2sheet.model.enums.ListRenderStrategy;
 import br.com.easypojo2sheet.model.enums.VerticalAlignment;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +19,7 @@ public class ColumnMetadataTest {
         Field f = Dummy.class.getDeclaredField("prop");
         ColumnMetadata meta = new ColumnMetadata(
                 f, "prop", 1, 10, "nested.value", "", "",
-                HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM
+                HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM,", ", ListRenderStrategy.AGGREGATE,null
         );
         Assert.assertTrue(meta.hasPropertyPath());
     }
@@ -28,7 +29,7 @@ public class ColumnMetadataTest {
         Field f = Dummy.class.getDeclaredField("prop");
         ColumnMetadata meta = new ColumnMetadata(
                 f, "prop", 1, 10, "", "", "",
-                HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM
+                HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM,", ",ListRenderStrategy.AGGREGATE,null
         );
         Assert.assertFalse(meta.hasPropertyPath());
     }
