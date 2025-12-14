@@ -1,8 +1,10 @@
 package br.com.easypojo2sheet.core.util;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -23,7 +25,7 @@ public enum AggregationType {
             
             return list.stream()
                     .map(item -> extractNumericValue(item, property))
-                    .filter(val -> val != null)
+                    .filter(Objects::nonNull)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
     },
@@ -41,8 +43,8 @@ public enum AggregationType {
             
             List<BigDecimal> values = list.stream()
                     .map(item -> extractNumericValue(item, property))
-                    .filter(val -> val != null)
-                    .collect(Collectors.toList());
+                    .filter(Objects::nonNull)
+                    .toList();
             
             if (values.isEmpty()) {
                 return BigDecimal.ZERO;
@@ -51,7 +53,7 @@ public enum AggregationType {
             BigDecimal sum = values.stream()
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             
-            return sum.divide(new BigDecimal(values.size()), 2, BigDecimal.ROUND_HALF_UP);
+            return sum.divide(new BigDecimal(values.size()), 2, RoundingMode.HALF_UP);
         }
     },
     
@@ -68,7 +70,7 @@ public enum AggregationType {
             
             return list.stream()
                     .map(item -> extractNumericValue(item, property))
-                    .filter(val -> val != null)
+                    .filter(Objects::nonNull)
                     .min(Comparator.naturalOrder())
                     .orElse(null);
         }
@@ -87,7 +89,7 @@ public enum AggregationType {
             
             return list.stream()
                     .map(item -> extractNumericValue(item, property))
-                    .filter(val -> val != null)
+                    .filter(Objects::nonNull)
                     .max(Comparator.naturalOrder())
                     .orElse(null);
         }
@@ -142,7 +144,7 @@ public enum AggregationType {
                             return null;
                         }
                     })
-                    .filter(val -> val != null)
+                    .filter(Objects::nonNull)
                     .distinct()
                     .count();
         }
