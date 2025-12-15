@@ -51,6 +51,10 @@ JMH benchmarks comparing EasyPojo2Sheet with Apache POI, EasyExcel, and FastExce
 - 🎯 **Ideal for typical enterprise use cases** where maintainability is a priority
 - 🐳 **Perfect for memory-constrained environments** such as containers and serverless
 
+![Throughput Comparision](.github/assets/comparison.png)
+
+![Memory Comparision](.github/assets/memory.png)
+
 > **Note**: While it is not the fastest library in absolute terms, EasyPojo2Sheet prioritizes developer productivity and efficient resource usage over performance micro-optimizations.
 
 ## 📦 Installation
