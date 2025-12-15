@@ -49,6 +49,10 @@ Benchmarks JMH comparando EasyPojo2Sheet com Apache POI, EasyExcel e FastExcel r
 - 🎯 **Ideal para casos de uso empresariais típicos** onde manutenibilidade é prioridade
 - 🐳 **Perfeito para ambientes com memória limitada** como containers e serverless
 
+![Comparação de Throughput](.github/assets/comparison.png)
+
+![Comparação de uso de Memória](.github/assets/memory.png)
+
 > **Nota**: Embora não seja a biblioteca mais rápida em termos absolutos, o EasyPojo2Sheet prioriza produtividade do desenvolvedor e uso eficiente de recursos sobre micro-otimizações de performance.
 
 
