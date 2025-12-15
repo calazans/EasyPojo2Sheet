@@ -3,7 +3,7 @@
   <br><br>
   <p><strong>Biblioteca Java simples e poderosa para exportar POJOs para Excel</strong></p>
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.calazans/EasyPojo2Sheet?color=0a7a4b&label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.calazans/EasyPojo2Sheet)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.calazans/easypojo2sheet-core?color=0a7a4b&label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.calazans/easypojo2sheet-core)
 [![codecov](https://codecov.io/github/calazans/EasyPojo2Sheet/branch/main/graph/badge.svg?token=1Y7G60N1O1)](https://codecov.io/github/calazans/EasyPojo2Sheet)
 [![Java](https://img.shields.io/badge/Java-17%2B-0a7a4b?logo=openjdk)](https://openjdk.org/)
 [![License](https://img.shields.io/github/license/calazans/EasyPojo2Sheet?color=0a7a4b "License")](LICENSE.md)
