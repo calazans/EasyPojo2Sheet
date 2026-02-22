@@ -64,7 +64,7 @@ JMH benchmarks comparing EasyPojo2Sheet with Apache POI, EasyExcel, and FastExce
 <dependency>
   <groupId>io.github.calazans</groupId>
   <artifactId>easypojo2sheet-core</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
